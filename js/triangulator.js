@@ -125,6 +125,7 @@ function triangulator(elem, params) {
         }
 
         var triangles = [];
+        var resultTriangles = [];
         triangles = Delaunay.triangulate(cornerArray);
 
 
@@ -141,8 +142,8 @@ function triangulator(elem, params) {
             ctx.stroke();
         }
         */
-
-        for (i = triangles.length; i;) {
+        
+        for (i = triangles.length; i; ) {
 
             // console.log( (i*100/triangles.length)|0 + '%' );
 
@@ -151,24 +152,41 @@ function triangulator(elem, params) {
                 g: 0,
                 b: 0
             };
-
+            var triangle = {
+              color:"",
+              a: {x:0, y:0},
+              b: {x:0, y:0},
+              c: {x:0, y:0}
+            };
             // ctx.fillStyle = getRandomColor();
-
-            ctx.fillStyle = getColor(i - 1, cornerArray, triangles, image_data)
+            triangle.color = getColor(i - 1, cornerArray, triangles, image_data) 
+            ctx.fillStyle = triangle.color 
 
             ctx.beginPath();
             i--;
-            ctx.moveTo(cornerArray[triangles[i]][0], cornerArray[triangles[i]][1]);
+            triangle.a.x = cornerArray[triangles[i]][0];
+            triangle.a.y = cornerArray[triangles[i]][1];
+            ctx.moveTo(triangle.a.x, triangle.a.y);
+
             i--;
-            ctx.lineTo(cornerArray[triangles[i]][0], cornerArray[triangles[i]][1]);
+            triangle.b.x = cornerArray[triangles[i]][0];
+            triangle.b.y = cornerArray[triangles[i]][1];
+            ctx.lineTo(triangle.b.x, triangle.b.y);
+            
             i--;
-            ctx.lineTo(cornerArray[triangles[i]][0], cornerArray[triangles[i]][1]);
+            triangle.c.x = cornerArray[triangles[i]][0];
+            triangle.c.y = cornerArray[triangles[i]][1];
+            ctx.lineTo(triangle.c.x, triangle.c.y);
+           
             // ctx.lineTo(cornerArray[triangles[i+2]][0], cornerArray[triangles[i+2]][1]);
             ctx.closePath();
             ctx.fill();
+
+            resultTriangles.push(triangle);
         }
 
         elem.style.opacity = 1;
+        image.triangles = resultTriangles
     }
 
     function getColor(i, cornerArray, triangles, image_data) {
@@ -245,4 +263,6 @@ function triangulator(elem, params) {
             throw "Invalid color component";
         return ((r << 16) | (g << 8) | b).toString(16);
     }
+
+    return image;
 }

@@ -32,7 +32,7 @@ app.controller('MainCtrl', function($scope, $element, $attrs) {
     };
 
     $scope.update = function update(process) {
-        triangulator(elem, $scope.process);
+        $scope.image = triangulator(elem, $scope.process); 
     };
 
     $scope.onFileSelect = function($files) {
@@ -42,20 +42,63 @@ app.controller('MainCtrl', function($scope, $element, $attrs) {
             $scope.process.rawImage = file;
         }
     };
+    $scope.onDownload = function($event, fileType) {
+        downloadCanvas($event.currentTarget, elem, $scope.image.triangles, 'delaunay', fileType);
+    }
 
-    triangulator(elem, $scope.process);
+    $scope.image = triangulator(elem, $scope.process);
 });
 
 
-function downloadCanvas(link, canvasId, filename) {
-    link.href = document.getElementById('delaunay').toDataURL();
-    link.download = filename;
+function downloadCanvas(link, canvas, triangles, filename, fileType) {
+    if (fileType == 'png') {
+        link.href = canvas.toDataURL();
+        
+    } else {
+        size = {width: canvas.width, height: canvas.height};
+        svgString = getSVG(triangles, size);
+        var blob = new Blob( [ svgString ], { type: 'image/svg+xml' } );
+        link.href = window.URL.createObjectURL( blob );
+       
+    }
+    link.download = filename + "." + fileType;
 }
 
+function getSVG( triangles, size ) {
+    var triangle_keys = [ 'a', 'b', 'c' ];
+    var svg = '';
+
+    svg += '<?xml version="1.0" standalone="yes"?>';
+    svg += '<svg ';
+    svg += 'width="' + size.width + 'px" ';
+    svg += 'height="' + size.height + 'px" ';
+    svg += 'xmlns="http://www.w3.org/2000/svg" version="1.1">';
+
+    for ( var i = 0; i < triangles.length; i++ )
+    {
+        var triangle = triangles[i];
+        var points = [ ];
+
+        for ( var j = 0; j < triangle_keys.length; j++ )
+        {
+            var key = triangle_keys[j];
+            points[j] = triangle[key].x + ',' + triangle[key].y;
+        }
+
+        svg += '<polygon ';
+        svg += 'points="' + points.join( ' ' ) + '" ';
+        svg += 'fill="' + triangle.color + '" ';
+        svg += '/>';
+    }
+
+    svg += '</svg>';
+
+    return svg;
+}
 /** 
  * The event handler for the link's onclick event. We give THIS as a
  * parameter (=the link element), ID of the canvas and a filename.
  */
-document.getElementById('download').addEventListener('click', function() {
-    downloadCanvas(this, 'canvas', 'delaunay.png');
-}, false);
+// document.getElementById('download').addEventListener('click', function() {
+//     downloadCanvas(this, 'canvas', 'delaunay', 'svg');
+// }, false);

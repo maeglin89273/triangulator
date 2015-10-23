@@ -81,7 +81,8 @@
       <canvas ng-file-select="onFileSelect($files)" ng-file-drop="onFileSelect($files)" accept="image/*" id="delaunay" class="sh"></canvas>
 
       <div class="txt-center">
-        <a id="download" class="button m-1x inline-block txt-big">Download</a>
+        <a id="download" ng-click="onDownload($event, 'svg')" class="button m-1x inline-block txt-big">Download As SVG</a>
+        <a id="download" ng-click="onDownload($event, 'png')" class="button m-1x inline-block txt-big">Download As PNG</a>
         <div class="button m-1x inline-block txt-big button-default" ng-file-select="onFileSelect($files)" accept="image/*">Upload</div>
       </div>
     </div>
